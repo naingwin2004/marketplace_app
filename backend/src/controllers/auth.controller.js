@@ -39,6 +39,7 @@ export const register = async (req, res) => {
 			user: {
 				id: newUser._id,
 				email: newUser.email,
+				role: newUser.role,
 				username: newUser.username,
 				createdAt: newUser.createdAt,
 			},
@@ -76,6 +77,7 @@ export const login = async (req, res) => {
 			user: {
 				id: user._id,
 				email: user.email,
+				role: user.role,
 				username: user.username,
 				createdAt: user.createdAt,
 			},
@@ -92,10 +94,12 @@ export const checkAuth = async (req, res) => {
 
 	try {
 		const user = await User.findById(userId).select(
-			"username email createdAt _id",
+			"username role email createdAt _id",
 		);
 		if (!user) {
-			throw new Error("Unauthorized User");
+			return res.status(400).json({
+				message: "Unauthorized User",
+			});
 		}
 		return res.status(200).json({
 			message: "User authenticated",

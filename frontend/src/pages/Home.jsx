@@ -1,6 +1,7 @@
 import z from "zod";
 import { Search } from "lucide-react";
 import { useForm } from "react-hook-form";
+import { Link } from "react-router-dom";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { Card } from "../components/ui/card";
@@ -15,14 +16,14 @@ import {
 	PaginationNext,
 	PaginationPrevious,
 } from "../components/ui/pagination";
-
 import { useSelector } from "react-redux";
 
 export function CardGrid() {
-  
-  const user = useSelector(state => state.auth.user)
-  console.log(user)
-  
+	const user = useSelector((state) => state.auth.user);
+	
+	console.log(user);
+	
+
 	const items = [
 		{ id: 1, text: "Short text" },
 		{ id: 2, text: "Very long text here. ".repeat(20) },
@@ -54,9 +55,11 @@ export function CardGrid() {
 						</p>
 
 						{/* Fixed Height Button */}
-						<Button className='bg-blue-600 text-white hover:bg-blue-700'>
-							Learn More
-						</Button>
+						<Link to={"/product/1"}>
+							<Button className='bg-blue-600 text-white hover:bg-blue-700'>
+								Learn More
+							</Button>
+						</Link>
 					</div>
 				</Card>
 			))}

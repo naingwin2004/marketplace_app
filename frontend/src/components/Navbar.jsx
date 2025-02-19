@@ -3,9 +3,13 @@ import { NavLink, useNavigate } from "react-router-dom";
 import {
 	Menu,
 	Home,
+	Boxes,
 	LogIn,
 	LogOut,
+	UserCog,
 	UserPlus,
+	BellRing,
+	PackagePlus,
 	LayoutDashboard,
 } from "lucide-react";
 
@@ -35,28 +39,55 @@ import {
 } from "../components/ui/tooltip";
 
 import { useSelector, useDispatch } from "react-redux";
-import { setUser } from "../store/slices/user.js";
+import { setUser, setToken } from "../store/slices/user.js";
 
 const AuthData = [
 	{ name: "Login", path: "/login", icon: LogIn },
 	{ name: "Register", path: "/register", icon: UserPlus },
 ];
 
+const NavData = [
+	{
+		name: "AddProducts",
+		path: "add-product",
+		icon: PackagePlus,
+	},
+	{
+		name: "Manage Products",
+		path: "products",
+		icon: Boxes,
+	},
+	{
+		name: "Notifications",
+		path: "notifications",
+		icon: BellRing,
+	},
+	{
+		name: "Profile",
+		path: "profile",
+		icon: UserCog,
+	},
+];
+
 const Navbar = () => {
 	const navigate = useNavigate();
 	const dispatch = useDispatch();
 	const user = useSelector((state) => state.auth.user);
+	const token = useSelector((state) => state.auth.token);
 
 	const handleLogout = async () => {
 		try {
 			dispatch(setUser(null));
+			dispatch(setToken(null));
 			localStorage.removeItem("token");
+			localStorage.removeItem("user");
 			toast.success("logout successfully");
 			navigate("/");
 		} catch (err) {
 			console.log(err.message);
 		}
 	};
+
 	return (
 		<Sheet>
 			<div className='fixed top-0 left-0 w-full bg-white/10 dark:bg-black/10 backdrop-blur-[6px] border-b border-white/20 dark:border-black/20 z-50 '>
@@ -71,7 +102,7 @@ const Navbar = () => {
 						</div>
 
 						<div className='hidden md:flex gap-3'>
-							{!user &&
+							{!token &&
 								AuthData.map((auth, index) => (
 									<NavLink
 										to={auth.path}
@@ -104,37 +135,46 @@ const Navbar = () => {
 									</NavLink>
 								))}
 
-							{user && (
-								<NavLink to={"/profile"}>
-									{({ isActive }) => (
-										<TooltipProvider>
-											<Tooltip>
-												<TooltipTrigger asChild>
-													<Button
-														variant={
+							{token && (
+								<DropdownMenu>
+									<DropdownMenuTrigger asChild>
+										<Button variant=''>
+											<LayoutDashboard size={16} />
+											<span className='hidden lg:block'>
+												UserPanel
+											</span>
+										</Button>
+									</DropdownMenuTrigger>
+									<DropdownMenuContent>
+										<DropdownMenuLabel>
+											UserPanel
+										</DropdownMenuLabel>
+										<DropdownMenuSeparator />
+
+										{NavData.map((navItem, index) => (
+											<NavLink
+												to={navItem.path}
+												key={index}>
+												{({ isActive }) => (
+													<DropdownMenuItem
+														className={
 															isActive
-																? ""
-																: "ghost"
+																? "bg-black text-white"
+																: ""
 														}>
-														<LayoutDashboard
+														<navItem.icon
 															size={16}
 														/>
-														<span className='hidden lg:block'>
-															UserPanel
-														</span>
-													</Button>
-												</TooltipTrigger>
-
-												<TooltipContent className='lg:hidden'>
-													<p>UserPanel</p>
-												</TooltipContent>
-											</Tooltip>
-										</TooltipProvider>
-									)}
-								</NavLink>
+														{navItem.name}
+													</DropdownMenuItem>
+												)}
+											</NavLink>
+										))}
+									</DropdownMenuContent>
+								</DropdownMenu>
 							)}
 
-							{user && (
+							{token && (
 								<TooltipProvider>
 									<Tooltip>
 										<TooltipTrigger asChild>
@@ -195,21 +235,27 @@ const Navbar = () => {
 							</Button>
 						)}
 					</NavLink>
-					{user && (
-						<NavLink to={"/profile"}>
-							{({ isActive }) => (
-								<Button
-									variant={isActive ? "" : "ghost"}
-									className='justify-start w-full'>
-									<LayoutDashboard size={16} />
-									UserPanel
-								</Button>
-							)}
-						</NavLink>
-					)}
+
+					{token &&
+						NavData.map((navItem, index) => (
+							<NavLink
+								to={navItem.path}
+								key={index}>
+								{({ isActive }) => (
+									<Button
+										variant={isActive ? "" : "ghost"}
+										className='justify-start w-full'>
+										<navItem.icon size={16} />
+										{navItem.name}
+									</Button>
+								)}
+							</NavLink>
+						))}
+
+
 				</div>
 				<div>
-					{!user &&
+					{!token &&
 						AuthData.map((auth, index) => (
 							<NavLink
 								to={auth.path}
@@ -224,14 +270,15 @@ const Navbar = () => {
 								)}
 							</NavLink>
 						))}
-						{user && 					<Button
-						variant='ghost'
-						onClick={handleLogout}
-						className='justify-start w-full'>
-						<LogOut size={16} />
-						Logout
-					</Button>}
-
+					{token && (
+						<Button
+							variant='ghost'
+							onClick={handleLogout}
+							className='justify-start w-full'>
+							<LogOut size={16} />
+							Logout
+						</Button>
+					)}
 				</div>
 			</SheetContent>
 		</Sheet>
