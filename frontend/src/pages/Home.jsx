@@ -20,9 +20,6 @@ import { useSelector } from "react-redux";
 
 export function CardGrid() {
 	const user = useSelector((state) => state.auth.user);
-	
-	console.log(user);
-	
 
 	const items = [
 		{ id: 1, text: "Short text" },

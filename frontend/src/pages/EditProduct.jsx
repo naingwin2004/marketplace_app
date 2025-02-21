@@ -21,11 +21,11 @@ import {
 } from "../components/ui/select";
 import { Checkbox } from "../components/ui/checkbox";
 import { Button } from "../components/ui/button";
-import { Loader } from "lucide-react";
+
 import { useDispatch, useSelector } from "react-redux";
 import { setProduct } from "../store/slices/products.js";
 
-import { createProduct } from "../api/product.js";
+import { updateProduct } from "../api/product.js";
 
 // Zod Schema
 const productSchema = z.object({
@@ -50,41 +50,46 @@ const productSchema = z.object({
 	voucher: z.boolean().default(false),
 });
 
-const AddProductForm = () => {
+const EditProduct = () => {
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
-	const products = useSelector((state) => state.products);
+	const oldProduct = useSelector((state) => state.oldProduct.product);
 
 	const {
 		register,
 		control,
 		handleSubmit,
-		formState: { errors, isSubmitting },
+		formState: { errors },
 	} = useForm({
 		resolver: zodResolver(productSchema),
 		defaultValues: {
-			warranty: false,
-			voucher: false,
-			price: 0,
+			name: oldProduct.name,
+			description: oldProduct.description,
+			category: oldProduct.category,
+			price: oldProduct.price,
+			voucher: oldProduct.voucher,
+			warranty: oldProduct.warranty,
 		},
 	});
 
 	const onSubmit = async (data) => {
-		console.log("AddProductForm", data);
-		const res = await createProduct(data);
-		if (res.status === 201) {
+		data.seller = oldProduct.seller;
+		data._id = oldProduct._id;
+		console.log("EditProduct", data);
+		const res = await updateProduct(data);
+		if (res.status === 200) {
 			toast.success(res.data.message);
-			dispatch(setProduct(data));
 			return navigate("/products");
 		}
-		return toast.error(res.data.message);
+		toast.error(res.data.message);
+		return navigate("/products");
 	};
 
 	return (
 		<div className='mx-3 h-screen mt-14'>
 			<Card className='w-full max-w-2xl mx-auto'>
 				<CardHeader>
-					<CardTitle>Add Product</CardTitle>
+					<CardTitle>Edit Product</CardTitle>
 					<CardDescription>
 						Enter the details of the product you want to add.
 					</CardDescription>
@@ -217,13 +222,8 @@ const AddProductForm = () => {
 
 						<Button
 							type='submit'
-							className='w-full'
-							disabled={isSubmitting}>
-							{isSubmitting ? (
-								<Loader className='animate-spin' />
-							) : (
-								"Add Product"
-							)}
+							className='w-full'>
+							Edit Product
 						</Button>
 					</form>
 				</CardContent>
@@ -232,4 +232,4 @@ const AddProductForm = () => {
 	);
 };
 
-export default AddProductForm;
+export default EditProduct;
