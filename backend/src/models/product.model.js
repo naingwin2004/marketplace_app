@@ -51,8 +51,24 @@ const productSchema = new mongoose.Schema(
 		status: {
 			type: String,
 			enum: ["pending", "active"],
-			default:"pending"
+			default: "pending",
 		},
+		coverImage: {
+			url: {
+				type: String,
+			},
+			public_id: {
+				type: String,
+			},
+		},
+		arrayImages: [{
+			url: {
+				type: String,
+			},
+			public_id: {
+				type: String,
+			},
+		},],
 	},
 	{
 		timestamps: true,

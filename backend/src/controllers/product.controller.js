@@ -1,15 +1,49 @@
 import User from "../models/user.model.js";
 import Product from "../models/product.model.js";
 
+import cloudinary from "../middleware/cloudinary.js";
 export const createProduct = async (req, res) => {
 	const { name, description, category, price, voucher, warranty } = req.body;
+	const coverImage = req.files["coverImage"]
+		? req.files["coverImage"][0]
+		: null;
+	const arrayImages = req.files["arrayImages"] || [];
 	const userId = req.userId;
+
+	if (!name && !description && !category) {
+		return res.status(400).json({
+			message: "name,description and category are require!",
+		});
+	}
+
 	try {
 		const user = await User.findById(userId);
 		if (!user) {
 			return res.status(400).json({
 				message: "Unauthorized User",
 			});
+		}
+		let secureUrl_cover;
+		let secureUrl_array = [];
+		if (coverImage) {
+			const uploadResponse = await cloudinary.uploader.upload(
+				coverImage.path,
+			);
+			secureUrl_cover = {
+				url: uploadResponse.secure_url,
+				public_id: uploadResponse.public_id,
+			};
+		}
+		if (arrayImages.length > 0) {
+			for (const img of arrayImages) {
+				const uploadResponse = await cloudinary.uploader.upload(
+					img.path,
+				);
+				secureUrl_array.push({
+					url: uploadResponse.secure_url,
+					public_id: uploadResponse.public_id,
+				});
+			}
 		}
 		const newProduct = await Product.create({
 			name,
@@ -18,6 +52,8 @@ export const createProduct = async (req, res) => {
 			price,
 			voucher,
 			warranty,
+			coverImage: secureUrl_cover,
+			arrayImages: secureUrl_array,
 			seller: userId,
 		});
 		return res.status(201).json({
@@ -150,8 +186,16 @@ export const deleteProduct = async (req, res) => {
 				message: "No product found",
 			});
 		}
+		if (product.coverImage && product.coverImage.public_id) {
+			await cloudinary.uploader.destroy(product.coverImage.public_id);
+		}
+		if (product.arrayImages && product.arrayImages.length > 0) {
+			for (const img of product.arrayImages) {
+				await cloudinary.uploader.destroy(img.public_id);
+			}
+		}
 		return res.status(200).json({
-			message: "product destory",
+			message: "product destroy",
 		});
 	} catch (err) {
 		console.log("Error in deleteProduct :", err.message);

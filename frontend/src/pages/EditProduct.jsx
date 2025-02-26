@@ -59,7 +59,7 @@ const EditProduct = () => {
 		register,
 		control,
 		handleSubmit,
-		formState: { errors },
+		formState: { errors, isSubmitting },
 	} = useForm({
 		resolver: zodResolver(productSchema),
 		defaultValues: {
@@ -223,7 +223,7 @@ const EditProduct = () => {
 						<Button
 							type='submit'
 							className='w-full'>
-							Edit Product
+							{isSubmitting ? "loading..." : "Edit Product"}
 						</Button>
 					</form>
 				</CardContent>

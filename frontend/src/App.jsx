@@ -13,12 +13,17 @@ import Notifications from "./pages/Notifications";
 import ManageProducts from "./pages/ManageProducts";
 import AddProductForm from "./pages/AddProductForm";
 import EditProduct from "./pages/EditProduct";
+import ImageUpload from "./pages/ImageUpload";
 import ProductDetails from "./components/ProductDetails";
 
 import AuthProvider from "./lib/AuthProvider";
 import EditProvider from "./lib/EditProvider";
+import ImageProvider from "./lib/ImageProvider";
+
+import { useSelector } from "react-redux";
 
 const App = () => {
+	const token = useSelector((state) => state.auth.token);
 	const router = createBrowserRouter([
 		{
 			path: "/",
@@ -30,7 +35,7 @@ const App = () => {
 				},
 				{
 					path: "/login",
-					element: !localStorage.getItem("token") ? (
+					element: !token ? (
 						<Login />
 					) : (
 						<Navigate
@@ -41,7 +46,7 @@ const App = () => {
 				},
 				{
 					path: "/register",
-					element: !localStorage.getItem("token") ? (
+					element: !token? (
 						<Register />
 					) : (
 						<Navigate
@@ -72,6 +77,14 @@ const App = () => {
 						<AuthProvider>
 							<Notifications />
 						</AuthProvider>
+					),
+				},
+				{
+					path: "/image-upload",
+					element: (
+						<ImageProvider>
+							<ImageUpload />
+						</ImageProvider>
 					),
 				},
 				{

@@ -19,8 +19,9 @@ import {
 import { useSelector } from "react-redux";
 
 export function CardGrid() {
-	const user = useSelector((state) => state.auth.user);
-
+  const token = useSelector(state=>state.auth.token)
+  console.log(token)
+  
 	const items = [
 		{ id: 1, text: "Short text" },
 		{ id: 2, text: "Very long text here. ".repeat(20) },
@@ -41,7 +42,9 @@ export function CardGrid() {
 					className='h-full overflow-hidden shadow-lg break-words'>
 					<div className='flex flex-col h-full p-4'>
 						{/* Image Section (Fixed Height) */}
-						<div className='bg-gray-200 h-40 w-full mb-4 rounded-md' />
+						<div className='h-40 w-full mb-4 rounded-md aspect-video flex justify-center items-center bg-primary text-secondary text-2xl font-bold'>
+							ECSB
+						</div>
 
 						{/* Card Content (With Line Clamp)*/}
 						<h3 className='font-bold text-lg mb-2 line-clamp-1'>

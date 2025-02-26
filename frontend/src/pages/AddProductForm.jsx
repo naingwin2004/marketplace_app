@@ -1,7 +1,7 @@
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Navigate } from "react-router-dom";
 import {
 	Card,
 	CardHeader,
@@ -53,7 +53,7 @@ const productSchema = z.object({
 const AddProductForm = () => {
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
-	const products = useSelector((state) => state.products);
+	const product = useSelector((state) => state.products);
 
 	const {
 		register,
@@ -71,17 +71,13 @@ const AddProductForm = () => {
 
 	const onSubmit = async (data) => {
 		console.log("AddProductForm", data);
-		const res = await createProduct(data);
-		if (res.status === 201) {
-			toast.success(res.data.message);
-			dispatch(setProduct(data));
-			return navigate("/products");
-		}
-		return toast.error(res.data.message);
+		dispatch(setProduct(data));
+
+		return navigate("/image-upload");
 	};
 
 	return (
-		<div className='mx-3 h-screen mt-14'>
+		<div className='mx-3 mt-14'>
 			<Card className='w-full max-w-2xl mx-auto'>
 				<CardHeader>
 					<CardTitle>Add Product</CardTitle>
