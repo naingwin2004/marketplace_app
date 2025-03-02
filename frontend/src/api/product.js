@@ -41,10 +41,9 @@ export const getOldProduct = async (id) => {
 	}
 };
 
-export const updateProduct = async (data) => {
-	const id = data._id;
+export const updateProduct = async (formData) => {
 	try {
-		const res = await axiosInstance.post(`/edit-product/${id}`, data, {
+		const res = await axiosInstance.post(`/edit-product`, formData, {
 			headers: {
 				Authorization: `Bearer ${localStorage.getItem("token")}`,
 			},
@@ -56,11 +55,26 @@ export const updateProduct = async (data) => {
 };
 
 export const deleteProduct = async (id, seller) => {
-	console.log("deleteProduct", id);
-	console.log("deleteProduct seller ", seller);
 	try {
 		const res = await axiosInstance.delete(
-			`/delete-product/${id}/${seller}`,
+			`/delete-product/${id}/seller/${seller}`,
+			{
+				headers: {
+					Authorization: `Bearer ${localStorage.getItem("token")}`,
+				},
+			},
+		);
+		return res;
+	} catch (err) {
+		return err.response;
+	}
+};
+
+export const deleteImage = async (id, seller, public_id) => {
+	try {
+		const res = await axiosInstance.delete(
+			`/delete-image/${id}/seller/${seller}/image-id/${public_id}`,
+
 			{
 				headers: {
 					Authorization: `Bearer ${localStorage.getItem("token")}`,

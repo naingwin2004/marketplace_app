@@ -32,7 +32,7 @@ export const register = async (req, res) => {
 			email,
 			password: hashPassword,
 		});
-		const token = await generateToken(newUser._id);
+		const token = await generateToken(newUser);
 
 		return res.status(201).json({
 			message: "user created successfully",
@@ -71,7 +71,7 @@ export const login = async (req, res) => {
 		if (!isValidPassword) {
 			return res.status(400).json({ message: "Invalid credential" });
 		}
-		const token = await generateToken(user._id);
+		const token = await generateToken(user);
 		return res.status(200).json({
 			message: "login successfully",
 			user: {

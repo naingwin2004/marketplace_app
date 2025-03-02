@@ -7,7 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff, Loader } from "lucide-react";
 
 import { useDispatch } from "react-redux";
-import { setUser, setToken } from "../store/slices/user.js";
+import { setUser, setToken } from "../../store/slices/user.js";
 
 import {
 	Card,
@@ -16,11 +16,11 @@ import {
 	CardFooter,
 	CardHeader,
 	CardTitle,
-} from "../components/ui/card";
-import { Input } from "../components/ui/input";
-import { Button } from "../components/ui/button";
+} from "../../components/ui/card";
+import { Input } from "../../components/ui/input";
+import { Button } from "../../components/ui/button";
 
-import { login } from "../api/auth.js";
+import { login } from "../../api/auth.js";
 
 const schema = z.object({
 	email: z.string().min(1, { message: "Required" }).email(),

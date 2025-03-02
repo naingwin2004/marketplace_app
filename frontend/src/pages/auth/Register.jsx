@@ -7,7 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import toast from "react-hot-toast";
 
 import { useDispatch } from "react-redux";
-import { setUser, setToken } from "../store/slices/user.js";
+import { setUser, setToken } from "../../store/slices/user.js";
 
 import {
 	Card,
@@ -16,11 +16,11 @@ import {
 	CardFooter,
 	CardHeader,
 	CardTitle,
-} from "../components/ui/card";
-import { Input } from "../components/ui/input";
-import { Button } from "../components/ui/button";
+} from "../../components/ui/card";
+import { Input } from "../../components/ui/input";
+import { Button } from "../../components/ui/button";
 
-import { registerAcc } from "../api/auth.js";
+import { registerAcc } from "../../api/auth.js";
 
 const schema = z.object({
 	username: z

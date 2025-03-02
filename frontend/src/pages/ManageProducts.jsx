@@ -18,7 +18,7 @@ import {
 } from "../components/ui/pagination";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
-
+import { Loader } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import {
@@ -41,6 +41,7 @@ function formatMMK(amount) {
 const ManageProducts = () => {
 	const [products, setProducts] = useState([]);
 	const [loading, setLoading] = useState(true);
+	const [isSubmitting, setIsSubmitting] = useState(false);
 	const navigate = useNavigate();
 	const dispatch = useDispatch();
 
@@ -61,22 +62,28 @@ const ManageProducts = () => {
 	}, []);
 
 	const handleEdit = async (id) => {
+		setIsSubmitting(true);
 		const res = await getOldProduct(id);
 		if (res.status === 200) {
 			toast.success(res.data.message);
 			dispatch(setOldProduct(res.data.oldProduct));
+			setIsSubmitting(false);
 			return navigate(`/edit-product/${id}`);
 		}
 		toast.error(res.data.message);
+		setIsSubmitting(false);
 		return navigate("/");
 	};
 
 	const handleDelete = async (id, seller) => {
+		setIsSubmitting(true);
 		const res = await deleteProduct(id, seller);
 		if (res.status === 200) {
 			getproducts();
+			setIsSubmitting(false);
 			return toast.success(res.data.message);
 		}
+		setIsSubmitting(false);
 		return toast.error(res.data.message);
 	};
 
@@ -123,20 +130,35 @@ const ManageProducts = () => {
 									{formatMMK(product.price)}
 								</TableCell>
 								<TableCell>{product.status}</TableCell>
-								<TableCell className='text-center hover:underline flex gap-2'>
-									<button
-										onClick={() => handleEdit(product._id)}>
-										edit
-									</button>
-									<button
-										onClick={() =>
-											handleDelete(
-												product._id,
-												product.seller,
-											)
-										}>
-										delete
-									</button>
+								<TableCell className='flex justify-center gap-2'>
+									{isSubmitting ? (
+										<Loader
+											size={16}
+											className='animate-spin'
+										/>
+									) : (
+										<>
+											<button
+												className='hover:underline'
+												disabled={isSubmitting}
+												onClick={() =>
+													handleEdit(product._id)
+												}>
+												edit
+											</button>
+											<button
+												className='hover:underline'
+												disabled={isSubmitting}
+												onClick={() =>
+													handleDelete(
+														product._id,
+														product.seller,
+													)
+												}>
+												delete
+											</button>
+										</>
+									)}
 								</TableCell>
 							</TableRow>
 						))}
@@ -144,7 +166,7 @@ const ManageProducts = () => {
 				</Table>
 			)}
 			{products.length === 0 && <p>No products add</p>}
-			<Pagination  className="mt-3">
+			<Pagination className='mt-3'>
 				<PaginationContent>
 					<PaginationItem>
 						<PaginationPrevious href='#' />

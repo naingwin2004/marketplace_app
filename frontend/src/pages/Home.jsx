@@ -19,9 +19,8 @@ import {
 import { useSelector } from "react-redux";
 
 export function CardGrid() {
-  const token = useSelector(state=>state.auth.token)
-  console.log(token)
-  
+	const token = useSelector((state) => state.auth.token);
+
 	const items = [
 		{ id: 1, text: "Short text" },
 		{ id: 2, text: "Very long text here. ".repeat(20) },

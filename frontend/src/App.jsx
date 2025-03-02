@@ -6,14 +6,15 @@ import {
 
 import Main from "./layouts/Main";
 import Home from "./pages/Home";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
-import Profile from "./pages/Profile";
+import Login from "./pages/auth/Login";
+import Register from "./pages/auth/Register";
+import Profile from "./pages/auth/Profile";
 import Notifications from "./pages/Notifications";
 import ManageProducts from "./pages/ManageProducts";
-import AddProductForm from "./pages/AddProductForm";
-import EditProduct from "./pages/EditProduct";
-import ImageUpload from "./pages/ImageUpload";
+import AddProductForm from "./pages/add/AddProductForm";
+import EditProduct from "./pages/edit/EditProduct";
+import EditImage from "./pages/edit/EditImage";
+import ImageUpload from "./pages/add/ImageUpload";
 import ProductDetails from "./components/ProductDetails";
 
 import AuthProvider from "./lib/AuthProvider";
@@ -46,7 +47,7 @@ const App = () => {
 				},
 				{
 					path: "/register",
-					element: !token? (
+					element: !token ? (
 						<Register />
 					) : (
 						<Navigate
@@ -85,6 +86,14 @@ const App = () => {
 						<ImageProvider>
 							<ImageUpload />
 						</ImageProvider>
+					),
+				},
+				{
+					path: "/image-edit",
+					element: (
+						<EditProvider>
+							<EditImage />
+						</EditProvider>
 					),
 				},
 				{

@@ -1,17 +1,17 @@
 import React, { useState } from "react";
-import { Button } from "../components/ui/button";
-import { Input } from "../components/ui/input";
-import { Trash } from "lucide-react";
+import { Button } from "../../components/ui/button";
+import { Input } from "../../components/ui/input";
+import { Trash, Loader } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import {
 	Card,
 	CardHeader,
 	CardTitle,
 	CardContent,
-} from "../components/ui/card";
+} from "../../components/ui/card";
 import toast from "react-hot-toast";
 import { useSelector } from "react-redux";
-import { createProduct } from "../api/product.js";
+import { createProduct } from "../../api/product.js";
 
 const ImageUpload = () => {
 	const [coverImage, setCoverImage] = useState(null);
@@ -66,7 +66,7 @@ const ImageUpload = () => {
 			const res = await createProduct(formData);
 			if (res.status === 201) {
 				toast.success(res.data.message);
-			navigate("/products");
+				navigate("/products");
 			} else {
 				toast.error(res.data.message);
 			}
@@ -95,6 +95,7 @@ const ImageUpload = () => {
 						<Input
 							id='coverImage'
 							type='file'
+							accept='image/*'
 							className='hidden'
 							onChange={handleCoverImageChange}
 						/>
@@ -142,8 +143,11 @@ const ImageUpload = () => {
 										className='absolute bottom-3 right-3'
 										size='icon'
 										variant='destructive'
+										disabled={isSubmitting}
 										onClick={() => handleDelete(file)}>
-										<Trash size={16} />
+
+											<Trash size={16} />
+										
 									</Button>
 								</div>
 							))}

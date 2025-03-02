@@ -120,10 +120,98 @@ export const getOldProduct = async (req, res) => {
 };
 
 export const updateProduct = async (req, res) => {
-	const { name, description, category, price, voucher, warranty, seller } =
-		req.body;
+	const {
+		name,
+		description,
+		category,
+		price,
+		voucher,
+		warranty,
+		seller,
+		id,
+	} = req.body;
+	const coverImage = req.files["coverImage"]
+		? req.files["coverImage"][0]
+		: null;
+	const arrayImages = req.files["arrayImages"] || [];
 	const userId = req.userId;
-	const id = req.params.id;
+
+	try {
+		const user = await User.findById(userId);
+		if (!user) {
+			return res.status(400).json({ message: "User not found" });
+		}
+
+		if (!id) {
+			return res.status(400).json({ message: "Something went wrong" });
+		}
+
+		if (seller.toString() !== userId.toString()) {
+			return res.status(400).json({ message: "It is not your product" });
+		}
+
+		const updatedProduct = await Product.findById(id);
+		if (!updatedProduct) {
+			return res.status(404).json({ message: "Product not found" });
+		}
+
+		const existingCoverImage = updatedProduct.coverImage || null;
+		if (coverImage) {
+			if (existingCoverImage?.url) {
+				return res
+					.status(400)
+					.json({ message: "Cover image already exists" });
+			}
+			const uploadResponse = await cloudinary.uploader.upload(
+				coverImage.path,
+			);
+			updatedProduct.coverImage = {
+				url: uploadResponse.secure_url,
+				public_id: uploadResponse.public_id,
+			};
+		}
+
+		const existingArrayImages = updatedProduct.arrayImages || [];
+		if (arrayImages.length > 0) {
+			if (existingArrayImages.length + arrayImages.length > 6) {
+				return res.status(400).json({
+					message: "Maximum of 6 images allowed for product gallery",
+				});
+			}
+
+			for (const img of arrayImages) {
+				const uploadResponse = await cloudinary.uploader.upload(
+					img.path,
+				);
+				existingArrayImages.push({
+					url: uploadResponse.secure_url,
+					public_id: uploadResponse.public_id,
+				});
+			}
+			updatedProduct.arrayImages = existingArrayImages;
+		}
+
+		updatedProduct.name = name;
+		updatedProduct.description = description;
+		updatedProduct.category = category;
+		updatedProduct.price = price;
+		updatedProduct.voucher = voucher;
+		updatedProduct.warranty = warranty;
+
+		await updatedProduct.save();
+		return res.status(200).json({
+			message: "Product updated successfully",
+		});
+	} catch (err) {
+		console.log("Error in updateProduct:", err.message);
+		return res.status(500).json({ message: "Internal Server Error" });
+	}
+};
+
+export const deleteImage = async (req, res) => {
+	const userId = req.userId;
+	const { id, seller, public_id } = req.params;
+
 	try {
 		const user = await User.findById(userId);
 		if (!user) {
@@ -131,29 +219,48 @@ export const updateProduct = async (req, res) => {
 				message: "User not found",
 			});
 		}
-		if (!id) {
+
+		if (!id || !seller) {
 			return res.status(400).json({
-				message: "Somthing went wrong",
+				message: "Something went wrong",
 			});
 		}
+
 		if (seller.toString() !== userId.toString()) {
 			return res.status(400).json({
-				message: "It not your product",
+				message: "It's not your product",
 			});
 		}
-		const updatedProduct = await Product.findById(id);
-		updatedProduct.name = name;
-		updatedProduct.description = description;
-		updatedProduct.category = category;
-		updatedProduct.price = price;
-		updatedProduct.voucher = voucher;
-		updatedProduct.warranty = warranty;
-		updatedProduct.save();
+
+		const product = await Product.findById(id);
+		if (!product) {
+			return res.status(400).json({
+				message: "No product found",
+			});
+		}
+
+		if (product.coverImage && product.coverImage.public_id === public_id) {
+			await cloudinary.uploader.destroy(public_id);
+			product.coverImage = undefined;
+		}
+
+		const exists = product.arrayImages.some(
+			(image) => image.public_id === public_id,
+		);
+		if (product.arrayImages.length > 0 && exists) {
+			await cloudinary.uploader.destroy(public_id);
+			product.arrayImages = product.arrayImages.filter(
+				(image) => image.public_id !== public_id,
+			);
+		}
+
+		await product.save();
+
 		return res.status(200).json({
-			message: "product updated successfully",
+			message: "Image deleted successfully",
 		});
 	} catch (err) {
-		console.log("Error in updateProduct :", err.message);
+		console.log("Error in deleteImage:", err.message);
 		return res.status(500).json({ message: "Internal Server Error" });
 	}
 };

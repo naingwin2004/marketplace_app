@@ -1,23 +1,17 @@
-import mongoose from "mongoose";
+import mongoose from "mongoose"
 
-const t = {
-	category: null,
-	description: null,
-	name: null,
-	price: 0,
-	voucher: false,
-	warranty: false,
-};
+const imageSchema = new mongoose.Schema(
+	{
+		url: String,
+		public_id: String,
+	},
+	{ _id: false },
+);
+
 const productSchema = new mongoose.Schema(
 	{
-		name: {
-			type: String,
-			required: true,
-		},
-		description: {
-			type: String,
-			required: true,
-		},
+		name: { type: String, required: true },
+		description: { type: String, required: true },
 		category: {
 			type: String,
 			required: true,
@@ -31,18 +25,9 @@ const productSchema = new mongoose.Schema(
 				"books",
 			],
 		},
-		price: {
-			type: Number,
-			required: true,
-		},
-		voucher: {
-			type: Boolean,
-			default: false,
-		},
-		warranty: {
-			type: Boolean,
-			default: false,
-		},
+		price: { type: Number, required: true },
+		voucher: { type: Boolean, default: false },
+		warranty: { type: Boolean, default: false },
 		seller: {
 			type: mongoose.Schema.Types.ObjectId,
 			ref: "User",
@@ -53,28 +38,11 @@ const productSchema = new mongoose.Schema(
 			enum: ["pending", "active"],
 			default: "pending",
 		},
-		coverImage: {
-			url: {
-				type: String,
-			},
-			public_id: {
-				type: String,
-			},
-		},
-		arrayImages: [{
-			url: {
-				type: String,
-			},
-			public_id: {
-				type: String,
-			},
-		},],
+		coverImage: imageSchema,
+		arrayImages: [imageSchema],
 	},
-	{
-		timestamps: true,
-	},
+	{ timestamps: true },
 );
 
 const Product = mongoose.model("Product", productSchema);
-
 export default Product;

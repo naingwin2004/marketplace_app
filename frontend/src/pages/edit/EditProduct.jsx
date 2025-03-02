@@ -1,16 +1,16 @@
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { useNavigate, Navigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import {
 	Card,
 	CardHeader,
 	CardTitle,
 	CardDescription,
 	CardContent,
-} from "../components/ui/card";
-import { Input } from "../components/ui/input";
-import { Textarea } from "../components/ui/textarea";
+} from "../../components/ui/card";
+import { Input } from "../../components/ui/input";
+import { Textarea } from "../../components/ui/textarea";
 import toast from "react-hot-toast";
 import {
 	Select,
@@ -18,16 +18,15 @@ import {
 	SelectItem,
 	SelectTrigger,
 	SelectValue,
-} from "../components/ui/select";
-import { Checkbox } from "../components/ui/checkbox";
-import { Button } from "../components/ui/button";
-import { Loader } from "lucide-react";
+} from "../../components/ui/select";
+import { Checkbox } from "../../components/ui/checkbox";
+import { Button } from "../../components/ui/button";
+
 import { useDispatch, useSelector } from "react-redux";
-import { setProduct } from "../store/slices/products.js";
+import { setOldProduct } from "../../store/slices/oldProduct";
 
-import { createProduct } from "../api/product.js";
+import { updateProduct } from "../../api/product.js";
 
-// Zod Schema
 const productSchema = z.object({
 	name: z.string().min(1, "Product name is required"),
 	description: z.string().min(1, "Description is required"),
@@ -50,10 +49,10 @@ const productSchema = z.object({
 	voucher: z.boolean().default(false),
 });
 
-const AddProductForm = () => {
+const EditProduct = () => {
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
-	const product = useSelector((state) => state.products);
+	const oldProduct = useSelector((state) => state.oldProduct.product);
 
 	const {
 		register,
@@ -63,24 +62,30 @@ const AddProductForm = () => {
 	} = useForm({
 		resolver: zodResolver(productSchema),
 		defaultValues: {
-			warranty: false,
-			voucher: false,
-			price: 0,
+			name: oldProduct.name,
+			description: oldProduct.description,
+			category: oldProduct.category,
+			price: oldProduct.price,
+			voucher: oldProduct.voucher,
+			warranty: oldProduct.warranty,
 		},
 	});
 
 	const onSubmit = async (data) => {
-		console.log("AddProductForm", data);
-		dispatch(setProduct(data));
+		data.seller = oldProduct.seller;
+		data._id = oldProduct._id;
+		data.coverImage = oldProduct.coverImage;
+		data.arrayImages = oldProduct.arrayImages;
 
-		return navigate("/image-upload");
+		dispatch(setOldProduct(data));
+		return navigate("/image-edit");
 	};
 
 	return (
-		<div className='mx-3 mt-14'>
+		<div className='mx-3 h-screen mt-14'>
 			<Card className='w-full max-w-2xl mx-auto'>
 				<CardHeader>
-					<CardTitle>Add Product</CardTitle>
+					<CardTitle>Edit Product</CardTitle>
 					<CardDescription>
 						Enter the details of the product you want to add.
 					</CardDescription>
@@ -213,13 +218,8 @@ const AddProductForm = () => {
 
 						<Button
 							type='submit'
-							className='w-full'
-							disabled={isSubmitting}>
-							{isSubmitting ? (
-								<Loader className='animate-spin' />
-							) : (
-								"Add Product"
-							)}
+							className='w-full'>
+							{isSubmitting ? "loading..." : "Edit Product"}
 						</Button>
 					</form>
 				</CardContent>
@@ -228,4 +228,4 @@ const AddProductForm = () => {
 	);
 };
 
-export default AddProductForm;
+export default EditProduct;

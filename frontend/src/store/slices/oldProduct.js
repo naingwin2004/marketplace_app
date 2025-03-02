@@ -11,8 +11,9 @@ export const oldProductSlice = createSlice({
 		setOldProduct: (state, action) => {
 			state.product = action.payload;
 		},
+		
 	},
 });
 
-export const { setOldProduct } = oldProductSlice.actions;
+export const { setOldProduct, setCoverImage } = oldProductSlice.actions;
 export default oldProductSlice.reducer;

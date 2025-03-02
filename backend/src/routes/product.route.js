@@ -6,13 +6,12 @@ import {
 	getOldProduct,
 	updateProduct,
 	deleteProduct,
+	deleteImage,
 } from "../controllers/product.controller.js";
 import { authMiddleware } from "../middleware/auth.middleware.js";
-import {handleMulterErrors} from "../middleware/multer.js";
+import { handleMulterErrors } from "../middleware/multer.js";
 
 const router = express.Router();
-
-
 
 router.post(
 	"/create-product",
@@ -21,9 +20,14 @@ router.post(
 	createProduct,
 );
 
-router.post("/edit-product/:id", authMiddleware, updateProduct);
+router.post("/edit-product", authMiddleware, handleMulterErrors, updateProduct);
 router.get("/getall-products", authMiddleware, getAllProducts);
 router.get("/getold-product/:id", authMiddleware, getOldProduct);
-router.delete("/delete-product/:id/:seller", authMiddleware, deleteProduct);
+router.delete(
+	"/delete-product/:id/seller/:seller",
+	authMiddleware,
+	deleteProduct,
+);
+router.delete("/delete-image/:id/seller/:seller/image-id/:public_id", authMiddleware, deleteImage);
 
 export default router;

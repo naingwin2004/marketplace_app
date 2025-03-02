@@ -1,33 +1,33 @@
-import { useForm, Controller } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
+import { Loader } from "lucide-react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useDispatch, useSelector } from "react-redux";
+import { useForm, Controller } from "react-hook-form";
+import { useNavigate, Navigate } from "react-router-dom";
+
+import { Input } from "../../components/ui/input";
+import { Checkbox } from "../../components/ui/checkbox";
+import { Textarea } from "../../components/ui/textarea";
 import {
 	Card,
 	CardHeader,
 	CardTitle,
 	CardDescription,
 	CardContent,
-} from "../components/ui/card";
-import { Input } from "../components/ui/input";
-import { Textarea } from "../components/ui/textarea";
-import toast from "react-hot-toast";
+} from "../../components/ui/card";
 import {
 	Select,
 	SelectContent,
 	SelectItem,
 	SelectTrigger,
 	SelectValue,
-} from "../components/ui/select";
-import { Checkbox } from "../components/ui/checkbox";
-import { Button } from "../components/ui/button";
+} from "../../components/ui/select";
+import { Button } from "../../components/ui/button";
 
-import { useDispatch, useSelector } from "react-redux";
-import { setProduct } from "../store/slices/products.js";
+import { setProduct } from "../../store/slices/products.js";
+import { createProduct } from "../../api/product.js";
 
-import { updateProduct } from "../api/product.js";
-
-// Zod Schema
 const productSchema = z.object({
 	name: z.string().min(1, "Product name is required"),
 	description: z.string().min(1, "Description is required"),
@@ -50,10 +50,10 @@ const productSchema = z.object({
 	voucher: z.boolean().default(false),
 });
 
-const EditProduct = () => {
+const AddProductForm = () => {
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
-	const oldProduct = useSelector((state) => state.oldProduct.product);
+	const product = useSelector((state) => state.products);
 
 	const {
 		register,
@@ -63,33 +63,22 @@ const EditProduct = () => {
 	} = useForm({
 		resolver: zodResolver(productSchema),
 		defaultValues: {
-			name: oldProduct.name,
-			description: oldProduct.description,
-			category: oldProduct.category,
-			price: oldProduct.price,
-			voucher: oldProduct.voucher,
-			warranty: oldProduct.warranty,
+			warranty: false,
+			voucher: false,
 		},
 	});
 
 	const onSubmit = async (data) => {
-		data.seller = oldProduct.seller;
-		data._id = oldProduct._id;
-		console.log("EditProduct", data);
-		const res = await updateProduct(data);
-		if (res.status === 200) {
-			toast.success(res.data.message);
-			return navigate("/products");
-		}
-		toast.error(res.data.message);
-		return navigate("/products");
+		dispatch(setProduct(data));
+
+		return navigate("/image-upload");
 	};
 
 	return (
-		<div className='mx-3 h-screen mt-14'>
+		<div className='mx-3 mt-14'>
 			<Card className='w-full max-w-2xl mx-auto'>
 				<CardHeader>
-					<CardTitle>Edit Product</CardTitle>
+					<CardTitle>Add Product</CardTitle>
 					<CardDescription>
 						Enter the details of the product you want to add.
 					</CardDescription>
@@ -222,8 +211,13 @@ const EditProduct = () => {
 
 						<Button
 							type='submit'
-							className='w-full'>
-							{isSubmitting ? "loading..." : "Edit Product"}
+							className='w-full'
+							disabled={isSubmitting}>
+							{isSubmitting ? (
+								<Loader className='animate-spin' />
+							) : (
+								"Add Product"
+							)}
 						</Button>
 					</form>
 				</CardContent>
@@ -232,4 +226,4 @@ const EditProduct = () => {
 	);
 };
 
-export default EditProduct;
+export default AddProductForm;
