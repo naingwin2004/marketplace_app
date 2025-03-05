@@ -6,7 +6,7 @@ import {
 	TableHead,
 	TableHeader,
 	TableRow,
-} from "../components/ui/table";
+} from "../../components/ui/table";
 import {
 	Pagination,
 	PaginationContent,
@@ -15,21 +15,15 @@ import {
 	PaginationLink,
 	PaginationNext,
 	PaginationPrevious,
-} from "../components/ui/pagination";
+} from "../../components/ui/pagination";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import { Loader } from "lucide-react";
 import { useEffect, useState } from "react";
 
-import {
-	getallProducts,
-	getOldProduct,
-	deleteProduct,
-} from "../api/product.js";
+import { getAllUsers, userStatus } from "../../api/admin.js";
 
-import { useDispatch } from "react-redux";
-
-import { setOldProduct } from "../store/slices/oldProduct.js";
+import { setOldProduct } from "../../store/slices/oldProduct.js";
 
 function formatMMK(amount) {
 	if (amount >= 100000) {
@@ -38,22 +32,22 @@ function formatMMK(amount) {
 	return amount;
 }
 
-const ManageProducts = () => {
+const ManageUsers = () => {
 	const [page, setPage] = useState(1);
-	const [products, setProducts] = useState([]);
-	const [loading, setLoading] = useState(true);
+	const [users, setProducts] = useState([]);
+	const [loading, setLoading] = useState(false);
 	const [totalPages, setTotalPages] = useState(null);
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const navigate = useNavigate();
-	const dispatch = useDispatch();
 
 	const getproducts = async () => {
 		setLoading(true);
-		const res = await getallProducts(page);
+		const res = await getAllUsers(page);
 		if (res.status === 200) {
 			setLoading(false);
+			toast.success(res.data.message);
 			setTotalPages(res.data.totalPages);
-			return setProducts(res.data.products);
+			return setProducts(res.data.users);
 		}
 		toast.error(res.data.message);
 		setLoading(false);
@@ -64,24 +58,9 @@ const ManageProducts = () => {
 		getproducts();
 	}, [page]);
 
-	const handleEdit = async (id) => {
+	const handleStatus = async (id, status) => {
 		setIsSubmitting(true);
-		const res = await getOldProduct(id);
-		if (res.status === 200) {
-			getproducts();
-			toast.success(res.data.message);
-			dispatch(setOldProduct(res.data.oldProduct));
-			setIsSubmitting(false);
-			return navigate(`/edit-product/${id}`);
-		}
-		toast.error(res.data.message);
-		setIsSubmitting(false);
-		return navigate("/");
-	};
-
-	const handleDelete = async (id, seller) => {
-		setIsSubmitting(true);
-		const res = await deleteProduct(id, seller);
+		const res = await userStatus(id, status);
 		if (res.status === 200) {
 			getproducts();
 			setIsSubmitting(false);
@@ -98,23 +77,20 @@ const ManageProducts = () => {
 			</section>
 		);
 	}
-	console.log(totalPages);
-
 	return (
 		<div className='mt-12 mx-3'>
-			{products.length > 0 && (
+			{users.length > 0 && (
 				<Table>
-					<TableCaption>A list of your products.</TableCaption>
+					<TableCaption>A list of Users.</TableCaption>
 					<TableHeader>
 						<TableRow>
 							<TableHead className='min-w-[100px] md:w-[200px]'>
-								name
+								userName
 							</TableHead>
-							<TableHead>category</TableHead>
+							<TableHead>email</TableHead>
 							<TableHead className='min-w-[100px]'>
 								createdAt
 							</TableHead>
-							<TableHead>price</TableHead>
 							<TableHead>status</TableHead>
 
 							<TableHead className='text-center'>
@@ -123,29 +99,24 @@ const ManageProducts = () => {
 						</TableRow>
 					</TableHeader>
 					<TableBody>
-						{products.map((product) => (
-							<TableRow key={product._id}>
+						{users.map((user) => (
+							<TableRow key={user._id}>
 								<TableCell className='font-medium'>
-									{product.name}
+									{user.username}
 								</TableCell>
-								<TableCell>{product.category}</TableCell>
+								<TableCell>{user.email}</TableCell>
 								<TableCell>
-									{product.createdAt.split("T")[0]}
-								</TableCell>
-								<TableCell>
-									{formatMMK(product.price)}
+									{user.createdAt.split("T")[0]}
 								</TableCell>
 								<TableCell>
 									<span
 										className={`${
-											(product.status === "pending" &&
-												"bg-yellow-500") ||
-											(product.status === "reject" &&
+											(user.status === "banned" &&
 												"bg-red-500") ||
-											(product.status === "active" &&
+											(user.status === "active" &&
 												"bg-green-500")
 										} rounded text-white p-1`}>
-										{product.status}
+										{user.status}
 									</span>
 								</TableCell>
 								<TableCell className='flex justify-center gap-2'>
@@ -156,25 +127,31 @@ const ManageProducts = () => {
 										/>
 									) : (
 										<>
-											<button
-												className='hover:underline'
-												disabled={isSubmitting}
-												onClick={() =>
-													handleEdit(product._id)
-												}>
-												edit
-											</button>
-											<button
-												className='hover:underline'
-												disabled={isSubmitting}
-												onClick={() =>
-													handleDelete(
-														product._id,
-														product.seller,
-													)
-												}>
-												delete
-											</button>
+											{user.status === "active" ? (
+												<button
+													className='hover:underline text-red-500'
+													disabled={isSubmitting}
+													onClick={() =>
+														handleStatus(
+															user._id,
+															"banned",
+														)
+													}>
+													banned
+												</button>
+											) : (
+												<button
+													className='hover:underline text-green-500'
+													disabled={isSubmitting}
+													onClick={() =>
+														handleStatus(
+															user._id,
+															"active",
+														)
+													}>
+													unban
+												</button>
+											)}
 										</>
 									)}
 								</TableCell>
@@ -183,8 +160,8 @@ const ManageProducts = () => {
 					</TableBody>
 				</Table>
 			)}
-			{products.length === 0 && <p>No products add</p>}
-			{ totalPages > 1 &&
+			{users.length === 0 && <p>No User</p>}
+			{totalPages > 1 && (
 				<Pagination className='mt-3'>
 					<PaginationContent>
 						{page > 1 && (
@@ -215,9 +192,9 @@ const ManageProducts = () => {
 						)}
 					</PaginationContent>
 				</Pagination>
-			}
+			)}
 		</div>
 	);
 };
 
-export default ManageProducts;
+export default ManageUsers;

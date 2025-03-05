@@ -68,6 +68,7 @@ const ImageUpload = () => {
 				toast.success(res.data.message);
 				navigate("/products");
 			} else {
+				navigate("/");
 				toast.error(res.data.message);
 			}
 		} catch (error) {

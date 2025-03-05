@@ -35,7 +35,7 @@ const productSchema = new mongoose.Schema(
 		},
 		status: {
 			type: String,
-			enum: ["pending", "active"],
+			enum: ["pending", "active","reject"],
 			default: "pending",
 		},
 		coverImage: imageSchema,

@@ -23,6 +23,11 @@ export const createProduct = async (req, res) => {
 				message: "Unauthorized User",
 			});
 		}
+		if (user.role === "admin") {
+			return res.status(400).json({
+				message: "Bro you are admin!!!",
+			});
+		}
 		let secureUrl_cover;
 		let secureUrl_array = [];
 		if (coverImage) {
@@ -68,6 +73,9 @@ export const createProduct = async (req, res) => {
 
 export const getAllProducts = async (req, res) => {
 	const userId = req.userId;
+	const page = +req.query.page || 1;
+	const limit = 10;
+
 	try {
 		const user = await User.findById(userId);
 		if (!user) {
@@ -75,11 +83,22 @@ export const getAllProducts = async (req, res) => {
 				message: "User not found",
 			});
 		}
-		const products = await Product.find({ seller: userId }).sort({
-			createdAt: -1,
-		});
+		if (user.role === "admin") {
+			return res.status(400).json({
+				message: "Bro you are admin!!!",
+			});
+		}
+		const totalProducts = await Product.find().countDocuments();
+		const totalPages = Math.ceil(totalProducts / limit);
+		const products = await Product.find({ seller: userId })
+			.sort({
+				createdAt: -1,
+			})
+			.skip((page - 1) * limit)
+			.limit(limit);
 		return res.status(200).json({
 			products,
+			totalPages,
 		});
 	} catch (err) {
 		console.log("Error in getAllProducts :", err.message);
@@ -96,6 +115,11 @@ export const getOldProduct = async (req, res) => {
 		if (!user) {
 			return res.status(400).json({
 				message: "User not found",
+			});
+		}
+		if (user.role === "admin") {
+			return res.status(400).json({
+				message: "Bro you are admin!!!",
 			});
 		}
 		if (!id) {
@@ -141,7 +165,11 @@ export const updateProduct = async (req, res) => {
 		if (!user) {
 			return res.status(400).json({ message: "User not found" });
 		}
-
+		if (user.role === "admin") {
+			return res.status(400).json({
+				message: "Bro you are admin!!!",
+			});
+		}
 		if (!id) {
 			return res.status(400).json({ message: "Something went wrong" });
 		}
@@ -219,6 +247,11 @@ export const deleteImage = async (req, res) => {
 				message: "User not found",
 			});
 		}
+		if (user.role === "admin") {
+			return res.status(400).json({
+				message: "Bro you are admin!!!",
+			});
+		}
 
 		if (!id || !seller) {
 			return res.status(400).json({
@@ -275,6 +308,11 @@ export const deleteProduct = async (req, res) => {
 		if (!user) {
 			return res.status(400).json({
 				message: "User not found",
+			});
+		}
+		if (user.role === "admin") {
+			return res.status(400).json({
+				message: "Bro you are admin!!!",
 			});
 		}
 		if (!id && !seller) {

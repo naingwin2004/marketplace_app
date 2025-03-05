@@ -17,6 +17,9 @@ import EditImage from "./pages/edit/EditImage";
 import ImageUpload from "./pages/add/ImageUpload";
 import ProductDetails from "./components/ProductDetails";
 
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import ManageUsers from "./pages/admin/ManageUsers";
+
 import AuthProvider from "./lib/AuthProvider";
 import EditProvider from "./lib/EditProvider";
 import ImageProvider from "./lib/ImageProvider";
@@ -61,6 +64,22 @@ const App = () => {
 					element: (
 						<AuthProvider>
 							<AddProductForm />
+						</AuthProvider>
+					),
+				},
+				{
+					path: "/admin-dashboard",
+					element: (
+						<AuthProvider>
+							<AdminDashboard />
+						</AuthProvider>
+					),
+				},
+				{
+					path: "/manage-users",
+					element: (
+						<AuthProvider>
+							<ManageUsers />
 						</AuthProvider>
 					),
 				},

@@ -6,7 +6,7 @@ import {
 	TableHead,
 	TableHeader,
 	TableRow,
-} from "../components/ui/table";
+} from "../../components/ui/table";
 import {
 	Pagination,
 	PaginationContent,
@@ -15,21 +15,17 @@ import {
 	PaginationLink,
 	PaginationNext,
 	PaginationPrevious,
-} from "../components/ui/pagination";
+} from "../../components/ui/pagination";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import { Loader } from "lucide-react";
 import { useEffect, useState } from "react";
 
-import {
-	getallProducts,
-	getOldProduct,
-	deleteProduct,
-} from "../api/product.js";
+import { getAllProducts, productStatus } from "../../api/admin.js";
 
-import { useDispatch } from "react-redux";
 
-import { setOldProduct } from "../store/slices/oldProduct.js";
+
+import { setOldProduct } from "../../store/slices/oldProduct.js";
 
 function formatMMK(amount) {
 	if (amount >= 100000) {
@@ -38,20 +34,21 @@ function formatMMK(amount) {
 	return amount;
 }
 
-const ManageProducts = () => {
+const AdminDashboard = () => {
 	const [page, setPage] = useState(1);
 	const [products, setProducts] = useState([]);
 	const [loading, setLoading] = useState(true);
 	const [totalPages, setTotalPages] = useState(null);
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const navigate = useNavigate();
-	const dispatch = useDispatch();
+	
 
 	const getproducts = async () => {
 		setLoading(true);
-		const res = await getallProducts(page);
+		const res = await getAllProducts(page);
 		if (res.status === 200) {
 			setLoading(false);
+			toast.success(res.data.message);
 			setTotalPages(res.data.totalPages);
 			return setProducts(res.data.products);
 		}
@@ -64,24 +61,9 @@ const ManageProducts = () => {
 		getproducts();
 	}, [page]);
 
-	const handleEdit = async (id) => {
+	const handleStatus = async (id, status) => {
 		setIsSubmitting(true);
-		const res = await getOldProduct(id);
-		if (res.status === 200) {
-			getproducts();
-			toast.success(res.data.message);
-			dispatch(setOldProduct(res.data.oldProduct));
-			setIsSubmitting(false);
-			return navigate(`/edit-product/${id}`);
-		}
-		toast.error(res.data.message);
-		setIsSubmitting(false);
-		return navigate("/");
-	};
-
-	const handleDelete = async (id, seller) => {
-		setIsSubmitting(true);
-		const res = await deleteProduct(id, seller);
+		const res = await productStatus(id, status);
 		if (res.status === 200) {
 			getproducts();
 			setIsSubmitting(false);
@@ -98,8 +80,6 @@ const ManageProducts = () => {
 			</section>
 		);
 	}
-	console.log(totalPages);
-
 	return (
 		<div className='mt-12 mx-3'>
 			{products.length > 0 && (
@@ -114,6 +94,7 @@ const ManageProducts = () => {
 							<TableHead className='min-w-[100px]'>
 								createdAt
 							</TableHead>
+							<TableHead>Email</TableHead>
 							<TableHead>price</TableHead>
 							<TableHead>status</TableHead>
 
@@ -132,6 +113,7 @@ const ManageProducts = () => {
 								<TableCell>
 									{product.createdAt.split("T")[0]}
 								</TableCell>
+								<TableCell>{product.seller.email}</TableCell>
 								<TableCell>
 									{formatMMK(product.price)}
 								</TableCell>
@@ -156,25 +138,45 @@ const ManageProducts = () => {
 										/>
 									) : (
 										<>
-											<button
-												className='hover:underline'
-												disabled={isSubmitting}
-												onClick={() =>
-													handleEdit(product._id)
-												}>
-												edit
-											</button>
-											<button
-												className='hover:underline'
-												disabled={isSubmitting}
-												onClick={() =>
-													handleDelete(
-														product._id,
-														product.seller,
-													)
-												}>
-												delete
-											</button>
+											{product.status === "active" ||
+											product.status === "reject" ? (
+												<button
+													className='hover:underline text-yellow-500'
+													disabled={isSubmitting}
+													onClick={() =>
+														handleStatus(
+															product._id,
+															"pending",
+														)
+													}>
+													rollback
+												</button>
+											) : (
+												<>
+													<button
+														className='hover:underline text-green-500'
+														disabled={isSubmitting}
+														onClick={() =>
+															handleStatus(
+																product._id,
+																"active",
+															)
+														}>
+														approve
+													</button>
+													<button
+														className='hover:underline text-red-500'
+														disabled={isSubmitting}
+														onClick={() =>
+															handleStatus(
+																product._id,
+																"reject",
+															)
+														}>
+														reject
+													</button>
+												</>
+											)}
 										</>
 									)}
 								</TableCell>
@@ -184,7 +186,7 @@ const ManageProducts = () => {
 				</Table>
 			)}
 			{products.length === 0 && <p>No products add</p>}
-			{ totalPages > 1 &&
+			{totalPages > 1 && (
 				<Pagination className='mt-3'>
 					<PaginationContent>
 						{page > 1 && (
@@ -215,9 +217,9 @@ const ManageProducts = () => {
 						)}
 					</PaginationContent>
 				</Pagination>
-			}
+			)}
 		</div>
 	);
 };
 
-export default ManageProducts;
+export default AdminDashboard;

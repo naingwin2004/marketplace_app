@@ -69,6 +69,24 @@ const NavData = [
 	},
 ];
 
+const AdminNavData = [
+	{
+		name: "Admin Dashboard",
+		path: "admin-dashboard",
+		icon: LayoutDashboard,
+	},
+	{
+		name: "Manage Users",
+		path: "manage-users",
+		icon: UserCog,
+	},
+	{
+		name: "Profile",
+		path: "profile",
+		icon: UserCog,
+	},
+];
+
 const Navbar = () => {
 	const navigate = useNavigate();
 	const dispatch = useDispatch();
@@ -141,35 +159,65 @@ const Navbar = () => {
 										<Button variant=''>
 											<LayoutDashboard size={16} />
 											<span className='hidden lg:block'>
-												UserPanel
+												{user?.role === "admin"
+													? "Admin Panel"
+													: "User Panel"}
 											</span>
 										</Button>
 									</DropdownMenuTrigger>
 									<DropdownMenuContent>
 										<DropdownMenuLabel>
-											UserPanel
+											{user?.role === "admin"
+												? "Admin Panel"
+												: "User Panel"}
 										</DropdownMenuLabel>
 										<DropdownMenuSeparator />
 
-										{NavData.map((navItem, index) => (
-											<NavLink
-												to={navItem.path}
-												key={index}>
-												{({ isActive }) => (
-													<DropdownMenuItem
-														className={
-															isActive
-																? "bg-black text-white"
-																: ""
-														}>
-														<navItem.icon
-															size={16}
-														/>
-														{navItem.name}
-													</DropdownMenuItem>
-												)}
-											</NavLink>
-										))}
+										{user?.role === "admin"
+											? AdminNavData.map(
+													(navItem, index) => (
+														<NavLink
+															to={navItem.path}
+															key={index}>
+															{({ isActive }) => (
+																<DropdownMenuItem
+																	className={
+																		isActive
+																			? "bg-black text-white"
+																			: ""
+																	}>
+																	<navItem.icon
+																		size={
+																			16
+																		}
+																	/>
+																	{
+																		navItem.name
+																	}
+																</DropdownMenuItem>
+															)}
+														</NavLink>
+													),
+											  )
+											: NavData.map((navItem, index) => (
+													<NavLink
+														to={navItem.path}
+														key={index}>
+														{({ isActive }) => (
+															<DropdownMenuItem
+																className={
+																	isActive
+																		? "bg-black text-white"
+																		: ""
+																}>
+																<navItem.icon
+																	size={16}
+																/>
+																{navItem.name}
+															</DropdownMenuItem>
+														)}
+													</NavLink>
+											  ))}
 									</DropdownMenuContent>
 								</DropdownMenu>
 							)}
@@ -237,20 +285,39 @@ const Navbar = () => {
 					</NavLink>
 
 					{token &&
-						NavData.map((navItem, index) => (
-							<NavLink
-								to={navItem.path}
-								key={index}>
-								{({ isActive }) => (
-									<Button
-										variant={isActive ? "" : "ghost"}
-										className='justify-start w-full'>
-										<navItem.icon size={16} />
-										{navItem.name}
-									</Button>
-								)}
-							</NavLink>
-						))}
+						(user?.role === "admin"
+							? AdminNavData.map((navItem, index) => (
+									<NavLink
+										to={navItem.path}
+										key={index}>
+										{({ isActive }) => (
+											<Button
+												variant={
+													isActive ? "" : "ghost"
+												}
+												className='justify-start w-full'>
+												<navItem.icon size={16} />
+												{navItem.name}
+											</Button>
+										)}
+									</NavLink>
+							  ))
+							: NavData.map((navItem, index) => (
+									<NavLink
+										to={navItem.path}
+										key={index}>
+										{({ isActive }) => (
+											<Button
+												variant={
+													isActive ? "" : "ghost"
+												}
+												className='justify-start w-full'>
+												<navItem.icon size={16} />
+												{navItem.name}
+											</Button>
+										)}
+									</NavLink>
+							  )))}
 				</div>
 				<div>
 					{!token &&

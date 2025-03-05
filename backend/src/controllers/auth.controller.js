@@ -71,6 +71,12 @@ export const login = async (req, res) => {
 		if (!isValidPassword) {
 			return res.status(400).json({ message: "Invalid credential" });
 		}
+		if (user.status === "banned") {
+			return res.status(203).json({
+				message: "User was banned",
+			});
+		}
+
 		const token = await generateToken(user);
 		return res.status(200).json({
 			message: "login successfully",
@@ -94,11 +100,16 @@ export const checkAuth = async (req, res) => {
 
 	try {
 		const user = await User.findById(userId).select(
-			"username role email createdAt _id",
+			"-password",
 		);
 		if (!user) {
 			return res.status(400).json({
 				message: "Unauthorized User",
+			});
+		}
+		if (user.status === "banned") {
+			return res.status(203).json({
+				message: "User was banned",
 			});
 		}
 		return res.status(200).json({

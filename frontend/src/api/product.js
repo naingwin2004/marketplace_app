@@ -15,9 +15,9 @@ export const createProduct = async (data) => {
 	}
 };
 
-export const getallProducts = async () => {
+export const getallProducts = async (page) => {
 	try {
-		const res = await axiosInstance.get("/getall-products", {
+		const res = await axiosInstance.get(`/getall-products?page=${page}`, {
 			headers: {
 				Authorization: `Bearer ${localStorage.getItem("token")}`,
 			},
