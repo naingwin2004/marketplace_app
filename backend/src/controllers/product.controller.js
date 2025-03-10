@@ -2,6 +2,8 @@ import User from "../models/user.model.js";
 import Product from "../models/product.model.js";
 
 import cloudinary from "../middleware/cloudinary.js";
+import mongoose from "mongoose";
+
 export const createProduct = async (req, res) => {
 	const { name, description, category, price, voucher, warranty } = req.body;
 	const coverImage = req.files["coverImage"]
@@ -74,6 +76,7 @@ export const createProduct = async (req, res) => {
 export const getAllProducts = async (req, res) => {
 	const userId = req.userId;
 	const page = +req.query.page || 1;
+	const sort = +req.query.sort || -1;
 	const limit = 10;
 
 	try {
@@ -92,7 +95,7 @@ export const getAllProducts = async (req, res) => {
 		const totalPages = Math.ceil(totalProducts / limit);
 		const products = await Product.find({ seller: userId })
 			.sort({
-				createdAt: -1,
+				createdAt: sort,
 			})
 			.skip((page - 1) * limit)
 			.limit(limit);
@@ -344,6 +347,88 @@ export const deleteProduct = async (req, res) => {
 		});
 	} catch (err) {
 		console.log("Error in deleteProduct :", err.message);
+		return res.status(500).json({ message: "Internal Server Error" });
+	}
+};
+
+export const publicProducts = async (req, res) => {
+	const page = +req.query.page || 1;
+	const category =
+		req.query?.category && req.query.category !== '""'
+			? req.query.category
+			: null;
+	const search =
+		req.query?.search && req.query.search !== '""'
+			? req.query.search
+			: null;
+	const limit = 9;
+
+	const filter = {
+		status: "active",
+	};
+
+	if (category) {
+		filter.category = category;
+	}
+
+	if (search) {
+		filter.name = { $regex: search, $options: "i" };
+	}
+
+	try {
+		const products = await Product.find(filter)
+			.sort({ createdAt: -1 })
+			.skip((page - 1) * limit)
+			.limit(limit);
+
+		if (products.length === 0) {
+			return res.status(404).json({
+				message: "No products found",
+				products: [],
+			});
+		}
+
+		const totalProducts = await Product.countDocuments(filter);
+		const totalPages = Math.ceil(totalProducts / limit);
+
+		return res.status(200).json({
+			totalProducts,
+			totalPages,
+			products,
+		});
+	} catch (err) {
+		console.log("Error in publicProduct :", err.message);
+		return res.status(500).json({ message: "Internal Server Error" });
+	}
+};
+
+export const publicProductDetails = async (req, res) => {
+	const id = req.params.id;
+	if (!id) {
+		return res.status(400).json({
+			message: "Somthing went wrong",
+		});
+	}
+
+	try {
+	  if (!mongoose.Types.ObjectId.isValid(id)) {
+  return res.status(400).json({ error: "Invalid product ID" });
+}
+		const products = await Product.findById(id).populate(
+			"seller",
+			"username",
+		);
+
+		if (!products) {
+			return res.status(404).json({
+				message: "No products found",
+			});
+		}
+		return res.status(200).json({
+			products,
+		});
+	} catch (err) {
+		console.log("Error in publicProductDetails :", err.message);
 		return res.status(500).json({ message: "Internal Server Error" });
 	}
 };

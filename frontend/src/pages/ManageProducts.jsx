@@ -18,7 +18,7 @@ import {
 } from "../components/ui/pagination";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
-import { Loader } from "lucide-react";
+import { Loader, ArrowDownUp } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import {
@@ -31,6 +31,8 @@ import { useDispatch } from "react-redux";
 
 import { setOldProduct } from "../store/slices/oldProduct.js";
 
+import { formatDate } from "../lib/formatDate";
+
 function formatMMK(amount) {
 	if (amount >= 100000) {
 		return (amount / 100000).toFixed(1).replace(".0", "") + "Lakh";
@@ -40,6 +42,7 @@ function formatMMK(amount) {
 
 const ManageProducts = () => {
 	const [page, setPage] = useState(1);
+	const [sort, setSort] = useState(-1);
 	const [products, setProducts] = useState([]);
 	const [loading, setLoading] = useState(true);
 	const [totalPages, setTotalPages] = useState(null);
@@ -49,7 +52,7 @@ const ManageProducts = () => {
 
 	const getproducts = async () => {
 		setLoading(true);
-		const res = await getallProducts(page);
+		const res = await getallProducts(page,sort);
 		if (res.status === 200) {
 			setLoading(false);
 			setTotalPages(res.data.totalPages);
@@ -62,7 +65,7 @@ const ManageProducts = () => {
 
 	useEffect(() => {
 		getproducts();
-	}, [page]);
+	}, [page, sort]);
 
 	const handleEdit = async (id) => {
 		setIsSubmitting(true);
@@ -98,7 +101,6 @@ const ManageProducts = () => {
 			</section>
 		);
 	}
-	console.log(totalPages);
 
 	return (
 		<div className='mt-12 mx-3'>
@@ -112,31 +114,37 @@ const ManageProducts = () => {
 							</TableHead>
 							<TableHead>category</TableHead>
 							<TableHead className='min-w-[100px]'>
-								createdAt
+								<p
+									className='flex items-center gap-1'
+									onClick={() =>
+										setSort(sort === 1 ? -1 : 1)
+									}>
+									createdAt <ArrowDownUp size={16} />
+								</p>
 							</TableHead>
 							<TableHead>price</TableHead>
 							<TableHead>status</TableHead>
 
-							<TableHead className='text-center'>
-								action
-							</TableHead>
+							<TableHead className=''>action</TableHead>
 						</TableRow>
 					</TableHeader>
 					<TableBody>
 						{products.map((product) => (
 							<TableRow key={product._id}>
 								<TableCell className='font-medium'>
-									{product.name}
+									<span className='line-clamp-1'>
+										{product.name}
+									</span>
 								</TableCell>
 								<TableCell>{product.category}</TableCell>
 								<TableCell>
-									{product.createdAt.split("T")[0]}
+									{formatDate(product.createdAt)}
 								</TableCell>
 								<TableCell>
 									{formatMMK(product.price)}
 								</TableCell>
 								<TableCell>
-									<span
+									<p
 										className={`${
 											(product.status === "pending" &&
 												"bg-yellow-500") ||
@@ -144,20 +152,20 @@ const ManageProducts = () => {
 												"bg-red-500") ||
 											(product.status === "active" &&
 												"bg-green-500")
-										} rounded text-white p-1`}>
+										} rounded text-white p-1 text-center font-bold`}>
 										{product.status}
-									</span>
+									</p>
 								</TableCell>
-								<TableCell className='flex justify-center gap-2'>
+								<TableCell>
 									{isSubmitting ? (
 										<Loader
 											size={16}
-											className='animate-spin'
+											className='animate-spin mx-auto'
 										/>
 									) : (
-										<>
+										<div className='flex gap-2'>
 											<button
-												className='hover:underline'
+												className='hover:underline  text-blue-500'
 												disabled={isSubmitting}
 												onClick={() =>
 													handleEdit(product._id)
@@ -165,7 +173,7 @@ const ManageProducts = () => {
 												edit
 											</button>
 											<button
-												className='hover:underline'
+												className='hover:underline text-red-500'
 												disabled={isSubmitting}
 												onClick={() =>
 													handleDelete(
@@ -175,7 +183,7 @@ const ManageProducts = () => {
 												}>
 												delete
 											</button>
-										</>
+										</div>
 									)}
 								</TableCell>
 							</TableRow>
@@ -184,7 +192,7 @@ const ManageProducts = () => {
 				</Table>
 			)}
 			{products.length === 0 && <p>No products add</p>}
-			{ totalPages > 1 &&
+			{totalPages > 1 && (
 				<Pagination className='mt-3'>
 					<PaginationContent>
 						{page > 1 && (
@@ -215,7 +223,7 @@ const ManageProducts = () => {
 						)}
 					</PaginationContent>
 				</Pagination>
-			}
+			)}
 		</div>
 	);
 };

@@ -7,6 +7,8 @@ import {
 	updateProduct,
 	deleteProduct,
 	deleteImage,
+	publicProducts,
+	publicProductDetails
 } from "../controllers/product.controller.js";
 import { authMiddleware } from "../middleware/auth.middleware.js";
 import { handleMulterErrors } from "../middleware/multer.js";
@@ -29,5 +31,8 @@ router.delete(
 	deleteProduct,
 );
 router.delete("/delete-image/:id/seller/:seller/image-id/:public_id", authMiddleware, deleteImage);
+
+router.get("/",publicProducts)
+router.get("/:id",publicProductDetails)
 
 export default router;

@@ -15,9 +15,9 @@ export const createProduct = async (data) => {
 	}
 };
 
-export const getallProducts = async (page) => {
+export const getallProducts = async (page,sort) => {
 	try {
-		const res = await axiosInstance.get(`/getall-products?page=${page}`, {
+		const res = await axiosInstance.get(`/getall-products?page=${page}&sort=${sort}`, {
 			headers: {
 				Authorization: `Bearer ${localStorage.getItem("token")}`,
 			},
@@ -75,6 +75,38 @@ export const deleteImage = async (id, seller, public_id) => {
 		const res = await axiosInstance.delete(
 			`/delete-image/${id}/seller/${seller}/image-id/${public_id}`,
 
+			{
+				headers: {
+					Authorization: `Bearer ${localStorage.getItem("token")}`,
+				},
+			},
+		);
+		return res;
+	} catch (err) {
+		return err.response;
+	}
+};
+
+export const publicProducts = async (page,search,activeCategory) => {
+	try {
+		const res = await axiosInstance.get(
+			`/?page=${page}&search=${search}&category=${activeCategory}`,
+			{
+				headers: {
+					Authorization: `Bearer ${localStorage.getItem("token")}`,
+				},
+			},
+		);
+		return res;
+	} catch (err) {
+		return err.response;
+	}
+};
+
+export const publicProductDetails = async (id) => {
+	try {
+		const res = await axiosInstance.get(
+			`/${id}`,
 			{
 				headers: {
 					Authorization: `Bearer ${localStorage.getItem("token")}`,

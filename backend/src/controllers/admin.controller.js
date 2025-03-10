@@ -4,14 +4,17 @@ import User from "../models/user.model.js";
 export const getAllProducts = async (req, res) => {
 	try {
 		const page = +req.query.page || 1;
+		const sort = +req.query.sort || -1;
 		const limit = 10;
+
+		const status = +req.query?.status;
 
 		const totalProducts = await Product.find().countDocuments();
 		const totalPages = Math.ceil(totalProducts / limit);
 		const products = await Product.find()
 			.populate("seller", "email")
 			.sort({
-				createdAt: -1,
+				createdAt: sort,
 			})
 			.skip((page - 1) * limit)
 			.limit(limit);

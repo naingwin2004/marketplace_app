@@ -1,8 +1,8 @@
 import { axiosInstance } from "../lib/axiosInstance.js";
 
-export const getAllProducts = async (page) => {
+export const getAllProducts = async (page,sort) => {
 	try {
-		const res = await axiosInstance.get(`/admin/products?page=${page}`, {
+		const res = await axiosInstance.get(`/admin/products?page=${page}&sort=${sort}`, {
 			headers: {
 				Authorization: `Bearer ${localStorage.getItem("token")}`,
 			},

@@ -18,14 +18,13 @@ import {
 } from "../../components/ui/pagination";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
-import { Loader } from "lucide-react";
+import { Loader, ArrowDownUp } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { getAllProducts, productStatus } from "../../api/admin.js";
 
-
-
 import { setOldProduct } from "../../store/slices/oldProduct.js";
+import { formatDate } from "../../lib/formatDate";
 
 function formatMMK(amount) {
 	if (amount >= 100000) {
@@ -36,19 +35,18 @@ function formatMMK(amount) {
 
 const AdminDashboard = () => {
 	const [page, setPage] = useState(1);
+	const [sort, setSort] = useState(-1);
 	const [products, setProducts] = useState([]);
 	const [loading, setLoading] = useState(true);
 	const [totalPages, setTotalPages] = useState(null);
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const navigate = useNavigate();
-	
 
 	const getproducts = async () => {
 		setLoading(true);
-		const res = await getAllProducts(page);
+		const res = await getAllProducts(page,sort);
 		if (res.status === 200) {
 			setLoading(false);
-			toast.success(res.data.message);
 			setTotalPages(res.data.totalPages);
 			return setProducts(res.data.products);
 		}
@@ -59,7 +57,7 @@ const AdminDashboard = () => {
 
 	useEffect(() => {
 		getproducts();
-	}, [page]);
+	}, [page,sort]);
 
 	const handleStatus = async (id, status) => {
 		setIsSubmitting(true);
@@ -91,8 +89,14 @@ const AdminDashboard = () => {
 								name
 							</TableHead>
 							<TableHead>category</TableHead>
-							<TableHead className='min-w-[100px]'>
-								createdAt
+							<TableHead className='min-w-[100px] '>
+								<p
+									className='flex items-center gap-1'
+									onClick={() =>
+										setSort(sort === 1 ? -1 : 1)
+									}>
+									createdAt <ArrowDownUp size={16} />
+								</p>
 							</TableHead>
 							<TableHead>Email</TableHead>
 							<TableHead>price</TableHead>
@@ -107,18 +111,20 @@ const AdminDashboard = () => {
 						{products.map((product) => (
 							<TableRow key={product._id}>
 								<TableCell className='font-medium'>
-									{product.name}
+									<span className='line-clamp-1'>
+										{product.name}
+									</span>
 								</TableCell>
 								<TableCell>{product.category}</TableCell>
 								<TableCell>
-									{product.createdAt.split("T")[0]}
+									{formatDate(product.createdAt)}
 								</TableCell>
-								<TableCell>{product.seller.email}</TableCell>
+								<TableCell>{product.seller?.email}</TableCell>
 								<TableCell>
 									{formatMMK(product.price)}
 								</TableCell>
 								<TableCell>
-									<span
+									<p
 										className={`${
 											(product.status === "pending" &&
 												"bg-yellow-500") ||
@@ -126,18 +132,18 @@ const AdminDashboard = () => {
 												"bg-red-500") ||
 											(product.status === "active" &&
 												"bg-green-500")
-										} rounded text-white p-1`}>
+										} rounded text-white p-1 text-center font-bold`}>
 										{product.status}
-									</span>
+									</p>
 								</TableCell>
-								<TableCell className='flex justify-center gap-2'>
+								<TableCell>
 									{isSubmitting ? (
 										<Loader
 											size={16}
-											className='animate-spin'
+											className='animate-spin mx-auto'
 										/>
 									) : (
-										<>
+										<div className='flex justify-center gap-2 font-bold'>
 											{product.status === "active" ||
 											product.status === "reject" ? (
 												<button
@@ -152,7 +158,7 @@ const AdminDashboard = () => {
 													rollback
 												</button>
 											) : (
-												<>
+												<div className='flex gap-2'>
 													<button
 														className='hover:underline text-green-500'
 														disabled={isSubmitting}
@@ -175,9 +181,9 @@ const AdminDashboard = () => {
 														}>
 														reject
 													</button>
-												</>
+												</div>
 											)}
-										</>
+										</div>
 									)}
 								</TableCell>
 							</TableRow>

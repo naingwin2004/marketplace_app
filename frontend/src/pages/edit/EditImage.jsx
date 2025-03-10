@@ -64,6 +64,7 @@ const EditImage = () => {
 		}
 
 		if (isArrayImage) {
+		  setIsSubmitting(true);
 			const deletedArrayImage = product.arrayImages.filter(
 				(img) => img.public_id !== public_id,
 			);
@@ -149,11 +150,11 @@ const EditImage = () => {
 							onChange={handleCoverImageChange}
 						/>
 						{product?.coverImage && (
-							<div className='mt-4 flex justify-center relative'>
+							<div className='mt-4 flex justify-center relative rounded-lg aspect-video overflow-auto border'>
 								<img
 									src={product.coverImage.url}
 									alt='Cover Preview'
-									className='rounded-lg aspect-video overflow-auto object-cover object-center'
+									className='object-contain w-full h-full'
 								/>
 								<Button
 									className='absolute bottom-3 right-3'
@@ -175,11 +176,11 @@ const EditImage = () => {
 							</div>
 						)}
 						{coverImage && (
-							<div className='mt-4 flex justify-center'>
+							<div className='mt-4 flex justify-center rounded-lg aspect-video overflow-auto border'>
 								<img
 									src={URL.createObjectURL(coverImage)}
 									alt='Cover Preview'
-									className='rounded-lg aspect-video overflow-auto object-cover object-center'
+									className='object-contain w-full h-full'
 								/>
 							</div>
 						)}
@@ -204,12 +205,12 @@ const EditImage = () => {
 						<div className='grid grid-cols-2 md:grid-cols-3 gap-2 mt-4'>
 							{product?.arrayImages?.map((image, index) => (
 								<div
-									className='relative'
+									className='relative rounded-lg aspect-square overflow-auto border'
 									key={index}>
 									<img
 										src={image.url}
 										alt={`Array Image ${index + 1}`}
-										className='rounded-lg aspect-square overflow-auto object-cover object-center'
+										className='object-cover w-full h-full'
 									/>
 									<Button
 										className='absolute bottom-3 right-3'
@@ -231,7 +232,7 @@ const EditImage = () => {
 							))}
 							{arrayImages.map((file, index) => (
 								<div
-									className='relative'
+									className='relative rounded-lg aspect-square overflow-auto border'
 									key={index}>
 									<img
 										src={URL.createObjectURL(file)}
@@ -239,7 +240,7 @@ const EditImage = () => {
 											file.name ||
 											`Array Image ${index + 1}`
 										}
-										className='rounded-lg aspect-square overflow-auto object-cover object-center'
+										className='object-cover w-full h-full'
 									/>
 									<Button
 										className='absolute bottom-3 right-3'

@@ -49,6 +49,16 @@ const productSchema = z.object({
 	voucher: z.boolean().default(false),
 });
 
+const categoryData = [
+	{ value: "electronics", name: "Electronics and Gadgets" },
+	{ value: "clothing", name: "Clothing and Fashion" },
+	{ value: "home", name: "Home & Kitchen" },
+	{ value: "sports", name: "Sports & Outdoors" },
+	{ value: "toys", name: "Toys and Games" },
+	{ value: "beauty", name: "Beauty and Personal Care" },
+	{ value: "books", name: "Books ans Media" },
+];
+
 const EditProduct = () => {
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
@@ -140,27 +150,12 @@ const EditProduct = () => {
 											<SelectValue placeholder='Select a category' />
 										</SelectTrigger>
 										<SelectContent>
-											<SelectItem value='electronics'>
-												Electronics and Gadgets
-											</SelectItem>
-											<SelectItem value='clothing'>
-												Clothing and Fashion
-											</SelectItem>
-											<SelectItem value='home'>
-												Home & Kitchen
-											</SelectItem>
-											<SelectItem value='sports'>
-												Sports & Outdoors
-											</SelectItem>
-											<SelectItem value='toys'>
-												Toys and Games
-											</SelectItem>
-											<SelectItem value='beauty'>
-												Beauty and Personal Care
-											</SelectItem>
-											<SelectItem value='books'>
-												Books and Media
-											</SelectItem>
+											{categoryData.map((category) => (
+												<SelectItem
+													value={category.value}>
+													{category.name}
+												</SelectItem>
+											))}
 										</SelectContent>
 									</Select>
 								)}

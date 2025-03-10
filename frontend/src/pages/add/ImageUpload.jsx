@@ -101,11 +101,11 @@ const ImageUpload = () => {
 							onChange={handleCoverImageChange}
 						/>
 						{coverImage && (
-							<div className='mt-4 flex justify-center'>
+							<div className='mt-4 flex justify-center rounded-lg aspect-video overflow-auto border'>
 								<img
 									src={URL.createObjectURL(coverImage)}
 									alt='Cover Preview'
-									className='rounded-lg aspect-video overflow-auto object-cover object-center'
+									className='object-contain w-full h-full'
 								/>
 							</div>
 						)}
@@ -130,7 +130,7 @@ const ImageUpload = () => {
 						<div className='grid grid-cols-2 md:grid-cols-3 gap-2 mt-4'>
 							{arrayImages.map((file, index) => (
 								<div
-									className='relative'
+									className='relative rounded-lg aspect-square overflow-auto border'
 									key={index}>
 									<img
 										src={URL.createObjectURL(file)}
@@ -138,7 +138,7 @@ const ImageUpload = () => {
 											file.name ||
 											`Array Image ${index + 1}`
 										}
-										className='rounded-lg aspect-square overflow-auto object-cover object-center'
+										className='object-cover w-full h-full'
 									/>
 									<Button
 										className='absolute bottom-3 right-3'
@@ -146,9 +146,7 @@ const ImageUpload = () => {
 										variant='destructive'
 										disabled={isSubmitting}
 										onClick={() => handleDelete(file)}>
-
-											<Trash size={16} />
-										
+										<Trash size={16} />
 									</Button>
 								</div>
 							))}

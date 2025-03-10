@@ -24,6 +24,7 @@ import { useEffect, useState } from "react";
 import { getAllUsers, userStatus } from "../../api/admin.js";
 
 import { setOldProduct } from "../../store/slices/oldProduct.js";
+import { formatDate } from "../../lib/formatDate";
 
 function formatMMK(amount) {
 	if (amount >= 100000) {
@@ -45,7 +46,6 @@ const ManageUsers = () => {
 		const res = await getAllUsers(page);
 		if (res.status === 200) {
 			setLoading(false);
-			toast.success(res.data.message);
 			setTotalPages(res.data.totalPages);
 			return setProducts(res.data.users);
 		}
@@ -102,31 +102,34 @@ const ManageUsers = () => {
 						{users.map((user) => (
 							<TableRow key={user._id}>
 								<TableCell className='font-medium'>
-									{user.username}
+									<span className='line-clamp-1'>
+										{user.username}
+									</span>
 								</TableCell>
 								<TableCell>{user.email}</TableCell>
 								<TableCell>
-									{user.createdAt.split("T")[0]}
+
+									{formatDate(user.createdAt)}
 								</TableCell>
 								<TableCell>
-									<span
+									<p
 										className={`${
 											(user.status === "banned" &&
 												"bg-red-500") ||
 											(user.status === "active" &&
 												"bg-green-500")
-										} rounded text-white p-1`}>
+										} rounded text-white p-1 text-center font-bold`}>
 										{user.status}
-									</span>
+									</p>
 								</TableCell>
-								<TableCell className='flex justify-center gap-2'>
+								<TableCell>
 									{isSubmitting ? (
 										<Loader
 											size={16}
-											className='animate-spin'
+											className='animate-spin mx-auto'
 										/>
 									) : (
-										<>
+										<div className='flex justify-center gap-2 font-bold'>
 											{user.status === "active" ? (
 												<button
 													className='hover:underline text-red-500'
@@ -152,7 +155,7 @@ const ManageUsers = () => {
 													unban
 												</button>
 											)}
-										</>
+										</div>
 									)}
 								</TableCell>
 							</TableRow>
