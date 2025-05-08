@@ -11,6 +11,7 @@ import {
 	BellRing,
 	PackagePlus,
 	LayoutDashboard,
+	Heart,
 } from "lucide-react";
 
 import { ModeToggle } from "./mode-toggle";
@@ -63,6 +64,11 @@ const NavData = [
 		icon: BellRing,
 	},
 	{
+		name: "Favorite",
+		path: "favorite",
+		icon: Heart,
+	},
+	{
 		name: "Profile",
 		path: "profile",
 		icon: UserCog,
@@ -79,6 +85,11 @@ const AdminNavData = [
 		name: "Manage Users",
 		path: "manage-users",
 		icon: UserCog,
+	},
+		{
+		name: "Favorite",
+		path: "favorite",
+		icon: Heart,
 	},
 	{
 		name: "Profile",

@@ -376,28 +376,24 @@ export const publicProducts = async (req, res) => {
 	}
 
 	try {
-		const products = await Product.find(filter)
-			.sort({ createdAt: -1 })
-			.skip((page - 1) * limit)
-			.limit(limit);
-
-		if (products.length === 0) {
-			return res.status(404).json({
-				message: "No products found",
-				products: [],
-			});
-		}
-
 		const totalProducts = await Product.countDocuments(filter);
 		const totalPages = Math.ceil(totalProducts / limit);
+
+		const validPage = page > totalPages ? totalPages : page;
+
+		const products = await Product.find(filter)
+			.sort({ createdAt: -1 })
+			.skip((validPage - 1) * limit)
+			.limit(limit);
 
 		return res.status(200).json({
 			totalProducts,
 			totalPages,
+			currentPage: validPage,
 			products,
 		});
 	} catch (err) {
-		console.log("Error in publicProduct :", err.message);
+		console.log("Error in publicProduct:", err.message);
 		return res.status(500).json({ message: "Internal Server Error" });
 	}
 };
@@ -411,9 +407,9 @@ export const publicProductDetails = async (req, res) => {
 	}
 
 	try {
-	  if (!mongoose.Types.ObjectId.isValid(id)) {
-  return res.status(400).json({ error: "Invalid product ID" });
-}
+		if (!mongoose.Types.ObjectId.isValid(id)) {
+			return res.status(400).json({ error: "Invalid product ID" });
+		}
 		const products = await Product.findById(id).populate(
 			"seller",
 			"username",

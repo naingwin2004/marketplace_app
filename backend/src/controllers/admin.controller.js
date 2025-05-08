@@ -99,7 +99,7 @@ export const userStatus = async (req, res) => {
 		user.status = status;
 		await user.save();
 		return res.status(200).json({
-			message: "product approve",
+			message: "status change!",
 		});
 	} catch (err) {
 		console.log("Error in userStatus :", err.message);

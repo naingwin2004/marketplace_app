@@ -15,13 +15,16 @@ export const createProduct = async (data) => {
 	}
 };
 
-export const getallProducts = async (page,sort) => {
+export const getallProducts = async (page, sort) => {
 	try {
-		const res = await axiosInstance.get(`/getall-products?page=${page}&sort=${sort}`, {
-			headers: {
-				Authorization: `Bearer ${localStorage.getItem("token")}`,
+		const res = await axiosInstance.get(
+			`/getall-products?page=${page}&sort=${sort}`,
+			{
+				headers: {
+					Authorization: `Bearer ${localStorage.getItem("token")}`,
+				},
 			},
-		});
+		);
 		return res;
 	} catch (err) {
 		return err.response;
@@ -74,7 +77,6 @@ export const deleteImage = async (id, seller, public_id) => {
 	try {
 		const res = await axiosInstance.delete(
 			`/delete-image/${id}/seller/${seller}/image-id/${public_id}`,
-
 			{
 				headers: {
 					Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -87,7 +89,7 @@ export const deleteImage = async (id, seller, public_id) => {
 	}
 };
 
-export const publicProducts = async (page,search,activeCategory) => {
+export const publicProducts = async (page, search, activeCategory) => {
 	try {
 		const res = await axiosInstance.get(
 			`/?page=${page}&search=${search}&category=${activeCategory}`,
@@ -105,14 +107,67 @@ export const publicProducts = async (page,search,activeCategory) => {
 
 export const publicProductDetails = async (id) => {
 	try {
-		const res = await axiosInstance.get(
-			`/${id}`,
+		const res = await axiosInstance.get(`/${id}`, {
+			headers: {
+				Authorization: `Bearer ${localStorage.getItem("token")}`,
+			},
+		});
+		return res;
+	} catch (err) {
+		return err.response;
+	}
+};
+
+export const saveProduct = async (id) => {
+	try {
+		const res = await axiosInstance.post(
+			`save/${id}`,
+			{},
 			{
 				headers: {
 					Authorization: `Bearer ${localStorage.getItem("token")}`,
 				},
 			},
 		);
+		return res;
+	} catch (err) {
+		return err.response;
+	}
+};
+
+export const unsaveProduct = async (id) => {
+	try {
+		const res = await axiosInstance.delete(`save/unSave/${id}`, {
+			headers: {
+				Authorization: `Bearer ${localStorage.getItem("token")}`,
+			},
+		});
+		return res;
+	} catch (err) {
+		return err.response;
+	}
+};
+
+export const getSave = async () => {
+	try {
+		const res = await axiosInstance.get(`save/getSave`, {
+			headers: {
+				Authorization: `Bearer ${localStorage.getItem("token")}`,
+			},
+		});
+		return res;
+	} catch (err) {
+		return err.response;
+	}
+};
+
+export const getSaveProduct = async () => {
+	try {
+		const res = await axiosInstance.get(`save/getSaveProduct`, {
+			headers: {
+				Authorization: `Bearer ${localStorage.getItem("token")}`,
+			},
+		});
 		return res;
 	} catch (err) {
 		return err.response;

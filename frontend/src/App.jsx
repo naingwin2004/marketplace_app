@@ -9,6 +9,7 @@ import Home from "./pages/Home";
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
 import Profile from "./pages/auth/Profile";
+import Favorite from "./pages/auth/Favorite";
 import Notifications from "./pages/Notifications";
 import ManageProducts from "./pages/ManageProducts";
 import AddProductForm from "./pages/add/AddProductForm";
@@ -84,6 +85,14 @@ const App = () => {
 					),
 				},
 				{
+					path: "/favorite",
+					element: (
+						<AuthProvider>
+							<Favorite />
+						</AuthProvider>
+					),
+				},
+				{
 					path: "/products",
 					element: (
 						<AuthProvider>
@@ -117,11 +126,7 @@ const App = () => {
 				},
 				{
 					path: "/product/:id",
-					element: (
-						
-							<ProductDetails />
-
-					),
+					element: <ProductDetails />,
 				},
 				{
 					path: "/edit-product/:id",

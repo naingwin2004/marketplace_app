@@ -2,7 +2,7 @@ import z from "zod";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { X, Search } from "lucide-react";
+import { X, Search, Heart } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { Link } from "react-router-dom";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -22,7 +22,7 @@ import {
 import { Badge } from "../components/ui/badge";
 import { useSelector } from "react-redux";
 
-import { publicProducts } from "../api/product.js";
+import { publicProducts, saveProduct, getSave } from "../api/product.js";
 import SkeletonCard from "../components/SkeletonCard.jsx";
 
 import { formatDate } from "../lib/formatDate";
@@ -30,6 +30,7 @@ import { formatDate } from "../lib/formatDate";
 export function CardGrid({ page, search, setTotalPages, activeCategory }) {
 	const navigate = useNavigate();
 	const [products, setProducts] = useState([]);
+	const [saveProducts, setSave] = useState([]);
 	const [loading, setLoading] = useState(false);
 	const getproducts = async () => {
 		setLoading(true);
@@ -45,9 +46,37 @@ export function CardGrid({ page, search, setTotalPages, activeCategory }) {
 		return navigate("/");
 	};
 
+	const save = async (id) => {
+		setLoading(true);
+		const res = await saveProduct(id);
+		if (res.status === 201) {
+			setLoading(false);
+			fetchSave()
+			return toast.success(res.data.message);
+		}
+		setLoading(false);
+		return toast.error(res.data.message);
+	};
+
+	const fetchSave = async () => {
+		setLoading(true);
+		const res = await getSave();
+		if (res.status === 200) {
+			setLoading(false);
+			return setSave(res.data.product);
+		}
+		setLoading(false);
+		setSave([]);
+		return navigate("/");
+	};
+
 	useEffect(() => {
 		getproducts();
 	}, [page, search, activeCategory]);
+
+	useEffect(() => {
+		fetchSave();
+	}, [page]);
 
 	if (loading) {
 		return (
@@ -65,55 +94,78 @@ export function CardGrid({ page, search, setTotalPages, activeCategory }) {
 				<p className='text-center'>No products found</p>
 			)}
 			<div className='grid grid-cols-1 md:grid-cols-3 auto-rows-fr gap-4 p-4 mb-5 select-none'>
-				{products.map((product) => (
-					<Card
-						key={product._id}
-						className='h-full overflow-hidden shadow-lg break-words'>
-						<div className='flex flex-col h-full p-4'>
-							{/* Image Section (Fixed Height) */}
-							{product.coverImage ? (
-								<div className='w-full mb-4 rounded-md aspect-video overflow-auto'>
-									<img
-										src={product.coverImage?.url}
-										alt={product.coverImage?.public_id}
-										className='object-contain w-full h-full'
-									/>
+				{products.map((product) => {
+					const isSaved = saveProducts.some(
+						(save) =>
+							save.product.toString() === product._id.toString(),
+					);
+
+					return (
+						<Card
+							key={product._id}
+							className='h-full overflow-hidden shadow-lg break-words'>
+							<div className='flex flex-col h-full p-4'>
+								{/* Image Section */}
+								{product.coverImage ? (
+									<div className='w-full mb-4 rounded-md aspect-video overflow-auto'>
+										<img
+											src={product.coverImage?.url}
+											alt={product.coverImage?.public_id}
+											className='object-contain w-full h-full'
+										/>
+									</div>
+								) : (
+									<div className='h-40 w-full mb-4 rounded-md aspect-video flex justify-center items-center bg-primary text-secondary text-2xl font-bold'>
+										ECSB
+									</div>
+								)}
+
+								{/* Card Content */}
+								<div className='flex justify-between items-center'>
+									<div className='font-bold text-lg mb-2 line-clamp-1'>
+										{product.name}{" "}
+										<span>({product.category})</span>
+									</div>
+
+									{/* Heart Icon (Save/Unsave) */}
+									{isSaved ? (
+										<Heart
+											key={`heart-saved-${product._id}`}
+											className='fill-red-500 hover:fill-red-400 text-red-500 hover:text-red-500'
+										/>
+									) : (
+										<Heart
+											key={`heart-unsaved-${product._id}`}
+											className='text-red-500 hover:text-red-400'
+											onClick={() => save(product._id)}
+										/>
+									)}
 								</div>
-							) : (
-								<div className='h-40 w-full mb-4 rounded-md aspect-video flex justify-center items-center bg-primary text-secondary text-2xl font-bold'>
-									ECSB
+
+								<p className='line-clamp-3 text-muted-foreground mb-4 flex-grow'>
+									{product.description}
+								</p>
+
+								{/* Fixed Height Button */}
+								<div className='flex justify-between items-center'>
+									<Link to={`/product/${product._id}`}>
+										<Button className='bg-blue-600 text-white hover:bg-blue-700'>
+											Learn More
+										</Button>
+									</Link>
+									<span>{formatDate(product.createdAt)}</span>
 								</div>
-							)}
-
-							{/* Card Content (With Line Clamp)*/}
-
-							<h3 className='font-bold text-lg mb-2 line-clamp-1'>
-								{product.name}{" "}
-								<span className=''>({product.category})</span>
-							</h3>
-
-							<p className='line-clamp-3 text-muted-foreground mb-4 flex-grow'>
-								{product.description}
-							</p>
-
-							{/* Fixed Height Button */}
-							<div className='flex justify-between items-center'>
-								<Link to={`/product/${product._id} `}>
-									<Button className='bg-blue-600 text-white hover:bg-blue-700'>
-										Learn More
-									</Button>
-								</Link>
-								<span>{formatDate(product.createdAt)}</span>
 							</div>
-						</div>
-					</Card>
-				))}
+						</Card>
+					);
+				})}
 			</div>
 		</>
 	);
 }
 
 const categoryData = [
+	{ value: "", name: "All Products" },
 	{ value: "electronics", name: "Electronics and Gadgets" },
 	{ value: "clothing", name: "Clothing and Fashion" },
 	{ value: "home", name: "Home & Kitchen" },
@@ -181,7 +233,9 @@ const Home = () => {
 											? ""
 											: "secondary"
 									}`}>
-									{category.value}
+									{category.value === ""
+										? "all"
+										: category.value}
 								</Badge>
 							</div>
 						))}
